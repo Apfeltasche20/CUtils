@@ -8,7 +8,7 @@
 
 array_list* create_array_list_with_size(uint32_t size)
 {
-	array_list* array_list = safe_malloc(sizeof(array_list));
+	array_list* array_list = safe_malloc(sizeof(struct _array_list));
 
 	array_list->current_size = 0;
 	array_list->current_max_size = size;
@@ -19,7 +19,7 @@ array_list* create_array_list_with_size(uint32_t size)
 
 array_list* create_array_list()
 {
-	array_list* array_list = safe_malloc(sizeof(array_list));
+	array_list* array_list = safe_malloc(sizeof(struct _array_list));
 
 	array_list->current_size = 0;
 	array_list->current_max_size = LIST_START_SIZE;
