@@ -1,12 +1,16 @@
 #pragma once
 #include <stdint.h>
+#include "DynamicArray.h"
+#include "DynamicBuffer.h"
+#include "JPEG.h"
+#include "Windows.h"
 
 enum ImageFileFormat {
-	IMAGE_UNKNOWN, IMAGE_PNG, IMAGE_JPEG
+	IMAGE_UNKNOWN, IMAGE_PNG, IMAGE_JPEG, IMAGE_BMP
 };
 
 enum ImageFormat {
-	IMAGE_RGB, IMAGE_RGBA
+	IMAGE_RGB, IMAGE_RGBA, IMAGE_BGR
 };
 
 typedef struct image {
@@ -14,91 +18,19 @@ typedef struct image {
 	enum ImageFormat format;
 	uint32_t width;
 	uint32_t height;
+
+	// extra info
+	uint32_t x_resolution;
+	uint32_t y_resolution;
 } image;
 
-enum JPEG_SEGMENT_TYPE {
-	JPEG_SEGMENT_START_OF_IMAGE = 0xD8,
-	JPEG_SEGMENT_END_OF_IMAGE = 0xD9,
-	JPEG_SEGMENT_JFIF = 0xE0,
-	JPEG_SEGMENT_QUANTIZATION_TABLE = 0xdb,
-	JPEG_SEGMENT_PROGRESSIVE_DCT = 0xc2,
-	JPEG_SEGMENT_HUFFMAN_TABLE = 0xc4,
-	JPEG_SEGMENT_START_OF_SCAN = 0xda
-};
-
-#pragma pack(1)
-typedef struct jfif_section {
-	uint16_t marker;
-	uint8_t section_length_high;
-	uint8_t section_length_low;
-	char jfif_string[5];
-	uint16_t jfif_version;
-	uint8_t pixel_density;
-	uint16_t x_density;
-	uint16_t y_density;
-	uint8_t x_thumbnail_size;
-	uint8_t y_thumbnail_size;
-	uint8_t thumbnail_data[];
-} jfif_section;
-
-typedef struct jpeg_quantization_table_section {
-	uint16_t marker;
-	uint8_t section_length_high;
-	uint8_t section_length_low;
-} jpeg_quantization_table_section;
-
-typedef struct jpeg_progressive_dct_frame_component {
-	uint8_t c;
-	uint8_t h : 4;
-	uint8_t v : 4;
-	uint8_t tq;
-} jpeg_progressive_dct_frame_component;
-
-typedef struct jpeg_progressive_dct_section {
-	uint16_t marker;
-	uint8_t section_length_high;
-	uint8_t section_length_low;
-
-	// 6
-	uint8_t p;
-	uint16_t y;
-	uint16_t x;
-	uint8_t nf;
-
-	// 3
-	jpeg_progressive_dct_frame_component progressive_dct_frame_components[];
-} jpeg_progressive_dct_section;
-
-typedef struct jpeg_huffman_table_section {
-	uint16_t marker;
-	uint8_t section_length_high;
-	uint8_t section_length_low;
-} jpeg_huffman_table_section;
-
-typedef struct jpeg_start_of_scan_component {
-	uint8_t cs;
-	uint8_t td : 4;
-	uint8_t ta : 4;
-} jpeg_start_of_scan_component;
-
-typedef struct jpeg_start_of_scan_section {
-	uint16_t marker;
-	uint8_t section_length_high;
-	uint8_t section_length_low;
-
-	uint8_t ns;
-	jpeg_start_of_scan_component components[];
-
-	// uint8_t ss;
-	// uint8_t se;
-	// uint8_t ah : 4;
-	// uint8_t al : 4;
-} jpeg_start_of_scan_section;
-#pragma pack()
-
-typedef struct jpeg_image {
-	jfif_section* jfif_section;
-} jpeg_image;
+extern image* read_jpeg_image(uint8_t* image_data, uint64_t buffer_size);
+extern image* read_bmp_image(uint8_t* image_data, uint64_t buffer_size);
+extern void write_bmp_image(image* image, dynamic_buffer* out_buffer);
 
 image* read_image_from_file(char* file_name);
 image* read_image_from_data(uint8_t* image_data, uint64_t buffer_size);
+
+void write_image_to_file(image* image, enum ImageFileFormat format, char* file_name);
+
+void convert_image_to_format(image* image, enum ImageFormat format);

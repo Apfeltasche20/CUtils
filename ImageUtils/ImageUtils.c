@@ -1,6 +1,8 @@
 #include "ImageUtils.h"
 #include <Windows.h>
 #include "stdio.h"
+#include "DynamicBuffer.h"
+#include "DynamicArray.h"
 
 image* read_image_from_file(char* file_name)
 {
@@ -54,212 +56,24 @@ enum ImageFileFormat getImageFileFormat(uint8_t* image_data, uint64_t buffer_siz
 {
 	if ((buffer_size >= 3) && (image_data[0] == 0xff) && (image_data[1] == 0xd8) && (image_data[2] == 0xff))
 		return IMAGE_JPEG;
+	if ((buffer_size >= 2) && (image_data[0] == 0x42) && (image_data[1] == 0x4D))
+		return IMAGE_BMP;
 	
 	return IMAGE_UNKNOWN;
 }
 
-#define CHECK_BUFFER_BOUNDS(error_message) if (current_buffer_position >= buffer_size) {printf(error_message); return 0;}
-#define CHECK_BUFFER_LENGTH(length, error_message) if ((current_buffer_position + length) >= buffer_size) {printf(error_message); return 0;}
-#define get_section_length(section) ((section->section_length_high << 8) | section->section_length_low)
-
-image* decode_jpeg_image(jpeg_image* jpeg_image)
-{
-	printf("\nStarting decoding JPEG Image\n");
-	printf("\nFinished decoding JPEG Image\n");
-
-	return 0;
-}
-
-image* decode_progressive_jpeg_image(jpeg_image* jpeg_image, jpeg_progressive_dct_section* progressive_dct_section, uint64_t current_buffer_position, uint8_t* image_data, uint64_t buffer_size)
-{
-	CHECK_BUFFER_BOUNDS("Expected Huffman marker, but hit EOF!\n");
-	
-	if (image_data[current_buffer_position] != 0xFF)
-	{
-		printf("Expected JPEG marker, but got 0x%x!\n", image_data[current_buffer_position]);
-		return 0;
-	}
-
-	current_buffer_position++;
-	CHECK_BUFFER_BOUNDS("Expected Huffman marker, but hit EOF!\n");
-
-	uint8_t section_type = image_data[current_buffer_position++];
-	if (section_type != JPEG_SEGMENT_HUFFMAN_TABLE)
-	{
-		printf("Expected Huffman marker, but got other marker 0x%x!\n", section_type);
-		return 0;
-	}
-
-	CHECK_BUFFER_LENGTH(2, "Expected Huffman section size, but hit EOF!\n");
-
-	jpeg_huffman_table_section* huffman_table_section = (jpeg_huffman_table_section*)&(image_data[current_buffer_position - 2]);
-	current_buffer_position += get_section_length(huffman_table_section);
-
-	CHECK_BUFFER_BOUNDS("Huffman section exceeded file size!\n")
-
-	if (image_data[current_buffer_position] != 0xFF)
-	{
-		printf("Expected JPEG marker, but got 0x%x!\n", image_data[current_buffer_position]);
-		return 0;
-	}
-
-	current_buffer_position++;
-	CHECK_BUFFER_BOUNDS("Expected Start of Scan marker, but hit EOF!\n");
-
-	section_type = image_data[current_buffer_position++];
-	if (section_type != JPEG_SEGMENT_START_OF_SCAN)
-	{
-		printf("Expected Start of Scan marker, but got other marker 0x%x!\n", section_type);
-		return 0;
-	}
-
-	CHECK_BUFFER_LENGTH(2, "Expected Start of Scan section size, but hit EOF!\n");
-
-	jpeg_start_of_scan_section* start_of_scan_section = (jpeg_start_of_scan_section*)&(image_data[current_buffer_position - 2]);
-	current_buffer_position += get_section_length(huffman_table_section);
-
-	CHECK_BUFFER_BOUNDS("Start of Scan section exceeded file size!\n");
-
-	uint64_t data_start = current_buffer_position;
-	uint64_t data_end = 0;
-	
-	printf("");
-	return 0;
-}
-
-image* read_jpeg_image(uint8_t* image_data, uint64_t buffer_size)
-{
-	//jpeg_image* jpeg_image = malloc(sizeof(struct jpeg_image));
-	jpeg_image jpeg_image;
-	
-	uint64_t current_buffer_position = 0;
-	while (1)
-	{
-		CHECK_BUFFER_BOUNDS("Expected JPEG marker, but hit EOF!\n");
-
-		/*
-		if (search_for_next_marker)
-		{
-			while (1)
-			{
-				current_buffer_position++;
-
-				CHECK_BUFFER_BOUNDS("Searched for JPEG marker, but hit EOF!\n");
-
-				if (image_data[current_buffer_position] == 0xFF)
-				{
-					current_buffer_position++;
-
-					CHECK_BUFFER_BOUNDS("Searched for JPEG marker, but hit EOF!\n");
-					if (image_data[current_buffer_position] != 0x0)
-					{
-						current_buffer_position--;
-						break;
-					}
-				}
-			}
-			search_for_next_marker = 0;
-		}
-		*/
-		if (image_data[current_buffer_position] != 0xFF)
-		{
-			printf("Expected JPEG marker, but got 0x%x!\n", image_data[current_buffer_position]);
-			return 0;
-		}
-
-		current_buffer_position++;
-		if (current_buffer_position >= buffer_size)
-		{
-			printf("Expected JPEG marker type, but hit EOF!\n");
-			return 0;
-		}
-
-		uint8_t section_type = image_data[current_buffer_position++];
-		switch (section_type)
-		{
-		case JPEG_SEGMENT_START_OF_IMAGE:
-			break;
-
-		case JPEG_SEGMENT_JFIF:;
-			printf("Found JFIF Section!\n");
-			CHECK_BUFFER_LENGTH(2, "Expected JPEG section size, but hit EOF!\n")
-
-			jfif_section* jfif_section = (struct jfif_section*)&(image_data[current_buffer_position - 2]);
-			jpeg_image.jfif_section = jfif_section;
-			current_buffer_position += get_section_length(jfif_section);
-
-			CHECK_BUFFER_BOUNDS("JPEG section exceeded file size!\n")
-			break;
-
-		case JPEG_SEGMENT_QUANTIZATION_TABLE:;
-			printf("Found Quantization Table Section!\n");
-			CHECK_BUFFER_LENGTH(2, "Expected JPEG section size, but hit EOF!\n")
-
-			jpeg_quantization_table_section* quantization_table_section = (jpeg_quantization_table_section*)&(image_data[current_buffer_position - 2]);
-			current_buffer_position += get_section_length(quantization_table_section);
-
-			CHECK_BUFFER_BOUNDS("JPEG section exceeded file size!\n")
-			break;
-
-		case JPEG_SEGMENT_PROGRESSIVE_DCT:;
-			printf("Found Progressive DCT Section!\n");
-			CHECK_BUFFER_LENGTH(2, "Expected JPEG section size, but hit EOF!\n")
-
-			jpeg_progressive_dct_section* progressive_dct_section = (jpeg_progressive_dct_section*)&(image_data[current_buffer_position - 2]);
-			current_buffer_position += get_section_length(progressive_dct_section);
-
-			CHECK_BUFFER_BOUNDS("JPEG section exceeded file size!\n")
-
-			return decode_progressive_jpeg_image(&jpeg_image, progressive_dct_section, current_buffer_position, image_data, buffer_size);
-			break;
-		/*
-		case JPEG_SEGMENT_HUFFMAN_TABLE:;
-			printf("Found Huffman Table Section!\n");
-			CHECK_BUFFER_LENGTH(2, "Expected JPEG section size, but hit EOF!\n")
-
-			jpeg_huffman_table_section* huffman_table_section = (jpeg_huffman_table_section*)&(image_data[current_buffer_position - 2]);
-			current_buffer_position += get_section_length(huffman_table_section);
-
-			CHECK_BUFFER_BOUNDS("JPEG section exceeded file size!\n")
-			break;
-
-		case JPEG_SEGMENT_START_OF_SCAN:;
-			printf("Found Start of Scan Section!\n");
-			CHECK_BUFFER_LENGTH(2, "Expected JPEG section size, but hit EOF!\n")
-
-			jpeg_start_of_scan_section* start_of_scan_section = (jpeg_start_of_scan_section*)&(image_data[current_buffer_position - 2]);
-			current_buffer_position += get_section_length(start_of_scan_section);
-
-			CHECK_BUFFER_BOUNDS("JPEG section exceeded file size!\n")
-
-			search_for_next_marker = 1;
-			break;
-
-		case JPEG_SEGMENT_END_OF_IMAGE:;
-			printf("Found End of Image Marker!\n");
-			if (current_buffer_position != buffer_size)
-				printf("WARNING: Data after end of Image!\n");
-			return decode_jpeg_image(&jpeg_image);
-			*/
-		case JPEG_SEGMENT_HUFFMAN_TABLE:
-		case JPEG_SEGMENT_START_OF_SCAN:
-		case JPEG_SEGMENT_END_OF_IMAGE:
-			printf("Expected SOF header or table header, but got other section 0x%x!\n", section_type);
-			return 0;
-		default:
-			printf("Unknown JPEG image marker 0x%x!\n", section_type);
-			return 0;
-		}
-	}
-	return 0;
-}
 
 image* read_image_from_data(uint8_t* image_data, uint64_t buffer_size)
 {
 	switch (getImageFileFormat(image_data, buffer_size))
 	{
 	case IMAGE_JPEG:
+		printf("JPEG Not Supported!\n");
+		return 0;
 		return read_jpeg_image(image_data, buffer_size);
+
+	case IMAGE_BMP:
+		return read_bmp_image(image_data, buffer_size);
 
 	case IMAGE_UNKNOWN:
 		printf("Unknown Image Format!\n");
@@ -267,9 +81,105 @@ image* read_image_from_data(uint8_t* image_data, uint64_t buffer_size)
 	}
 }
 
+void write_image_to_file(image* image, enum ImageFileFormat format, char* file_name)
+{
+	HANDLE file_handle = CreateFileA(file_name, GENERIC_WRITE, 0, 0, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
+	if (file_handle == 0)
+	{
+		printf("File %s could not be opened!\n", file_name);
+		return 0;
+	}
+	
+	dynamic_buffer* out_buffer = dynamic_buffer_create();
+	switch (format)
+	{
+	case IMAGE_BMP:
+		write_bmp_image(image, out_buffer);
+		break;
+
+	case IMAGE_UNKNOWN:
+		printf("Unknown Image Format!\n");
+		break;
+
+	default:
+		printf("Writing to this Image Format not supported!\n");
+		break;
+	}
+
+	uint8_t* output_buffer = dynamic_array_get_static_copy(out_buffer);
+
+	DWORD bytesRead = 0;
+	BOOL success = WriteFile(file_handle, output_buffer, dynamic_buffer_get_size(out_buffer), &bytesRead, 0);
+
+	if (!success)
+		printf("Error writing file!\n");
+	if (bytesRead != dynamic_buffer_get_size(out_buffer))
+		printf("Not all bytes of image written!\n");
+
+	free(output_buffer);
+	dynamic_buffer_free(out_buffer);
+	CloseHandle(file_handle);
+}
+
+void convert_image_from_bgr_to_argb(image* image)
+{
+	uint64_t pixels = image->height * image->width;
+	uint8_t* new_pixel_buffer = malloc(pixels * 4);
+	if (new_pixel_buffer == 0)
+	{
+		printf("Error Allocating Memory for Pixel Buffer!\n");
+		return 0;
+	}
+
+	for (int i = 0; i < pixels; i++)
+	{
+		//memcpy(&(new_pixel_buffer[i * 4]), &(image->rawImageData[i * 3]), 3);
+		new_pixel_buffer[i * 4 + 0] = image->rawImageData[i * 3 + 2];
+		new_pixel_buffer[i * 4 + 1] = image->rawImageData[i * 3 + 1];
+		new_pixel_buffer[i * 4 + 2] = image->rawImageData[i * 3 + 0];
+		new_pixel_buffer[i * 4 + 3] = 0xFF;
+	}
+
+	free(image->rawImageData);
+	image->rawImageData = new_pixel_buffer;
+}
+
+void convert_image_to_rgba(image* image)
+{
+	switch (image->format)
+	{
+	case IMAGE_BGR:
+		convert_image_from_bgr_to_argb(image);
+		break;
+	default:
+		printf("Unsupported Image Format to convert to!\n");
+		return;
+	}
+
+	image->format = IMAGE_RGBA;
+}
+
+void convert_image_to_format(image* image, enum ImageFormat format)
+{
+	if (image->format == format)
+		return;
+
+	switch (format)
+	{
+	case IMAGE_RGBA:
+		convert_image_to_rgba(image);
+		break;
+	default:
+		printf("Unsupported Image Format to convert to!\n");
+		return;
+	}
+}
+
 int main()
 {
-	read_image_from_file("testIMage.jpg");
+	image* image = read_image_from_file("testImage.bmp");
+	//convert_image_to_format(image, IMAGE_RGBA);
+	write_image_to_file(image, IMAGE_BMP, "output.bmp");
 	
 	return 0;
 }
