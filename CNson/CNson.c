@@ -1,6 +1,7 @@
 #include "CNson.h"
 #include <Windows.h>
 #include <stdio.h>
+#include <search.h>
 #include <DynamicBuffer.h>
 
 char* read_file(char* file)
@@ -555,7 +556,26 @@ void nson_parse_nson_object(nson_object* object, char* inner_string, char** outp
 
 nson_object* nson_parse_string(char* string)
 {
+	char* rest_string = string;
+	uint8_t key_type = 0;
 
+	char* next_key = nson_get_next_key(rest_string, &key_type, &rest_string);
+	if (key_type == 1)
+	{
+		nson_object* new_nson_object = nson_create_object(next_key);
+		nson_parse_nson_object(new_nson_object, rest_string, &rest_string, 0);
+		return new_nson_object;
+	}
+	else if(key_type == 2)
+	{
+		printf("WARNING: nson_parse_string called, but data has not a Nson Object first. Redirecting call to nson_parse_and_pack_string!\n");
+		return nson_parse_string_and_pack(string);
+	}
+	else
+	{
+		printf("nson_parse_string: error in finding root object!\n");
+		exit(-1);
+	}
 }
 
 nson_object* nson_parse_string_and_pack(char* string)
