@@ -1,12 +1,23 @@
-#include "cutils.h"
-#include "stdio.h"
-#include "Windows.h"
+#include "list.h"
+#include <stdio.h>
+#include <stdlib.h>
+
+void* safe_malloc(uint64_t size)
+{
+	void* address = malloc(size);
+	if (address == 0)
+	{
+		fprintf(stderr, "Error allocating 0x%llx Bytes\n", size);
+		exit(-1);
+	}
+	return address;
+}
 
 #define LIST_START_SIZE 8
 #define LIST_GROW_FACTOR 2
 #define LIST_SCRINK_FACTOR 4
 
-array_list* create_array_list_with_size(uint32_t size)
+array_list* array_list_create_with_size(uint32_t size)
 {
 	array_list* array_list = safe_malloc(sizeof(struct _array_list));
 
@@ -25,7 +36,7 @@ array_list* array_list_create()
 	array_list->current_max_size = LIST_START_SIZE;
 	array_list->current_array = safe_malloc(sizeof(uint64_t) * LIST_START_SIZE);
 
-	return (struct array_list*) array_list;
+	return (struct array_list*)array_list;
 }
 
 void array_list_alloc_space(array_list* array_list, uint32_t size)
@@ -35,7 +46,7 @@ void array_list_alloc_space(array_list* array_list, uint32_t size)
 		fprintf(stderr, "Array list can't be made size %i for %i entries\n", size, array_list->current_size);
 		exit(-1);
 	}
-	
+
 	void* new_array = safe_malloc(sizeof(uint64_t) * size);
 	memcpy(new_array, array_list->current_array, array_list->current_size);
 	free(array_list->current_array);
@@ -76,7 +87,7 @@ uint64_t array_list_get(array_list* array_list, uint32_t index)
 
 uint32_t array_list_get_index(array_list* array_list, uint64_t value)
 {
-	for (int i = 0;i < array_list->current_size;i++)
+	for (int i = 0; i < array_list->current_size; i++)
 	{
 		if (array_list->current_array[i] == value)
 			return i;
@@ -86,7 +97,7 @@ uint32_t array_list_get_index(array_list* array_list, uint64_t value)
 
 uint32_t array_list_has(array_list* array_list, uint64_t value)
 {
-	for (int i = 0;i < array_list->current_size;i++)
+	for (int i = 0; i < array_list->current_size; i++)
 	{
 		if (array_list->current_array[i] == value)
 			return 1;
@@ -110,17 +121,17 @@ uint64_t array_list_remove_index(array_list* array_list, uint32_t index)
 		fprintf(stderr, "Index out of Bounds %i for size %i\n", index, array_list->current_size);
 		exit(-1);
 	}
-	
+
 	uint64_t value = array_list->current_array[index];
 	array_list->current_array[index] = 0;
 
-	for (int i = (index + 1);i < array_list->current_size;i++)
+	for (int i = (index + 1); i < array_list->current_size; i++)
 	{
 		array_list->current_array[index - i] = array_list->current_array[index];
 	}
 	array_list->current_size--;
 
-	if((array_list->current_size * LIST_SCRINK_FACTOR) <= array_list->current_max_size)
+	if ((array_list->current_size * LIST_SCRINK_FACTOR) <= array_list->current_max_size)
 		array_list_scrink(array_list);
 
 	return value;

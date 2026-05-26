@@ -1,8 +1,8 @@
+#include "DynamicBuffer.h"
+#include "DynamicArray.h"
 #include "ImageUtils.h"
 #include <Windows.h>
 #include "stdio.h"
-#include "DynamicBuffer.h"
-#include "DynamicArray.h"
 
 image* read_image_from_file(char* file_name)
 {
@@ -175,9 +175,44 @@ void convert_image_to_format(image* image, enum ImageFormat format)
 	}
 }
 
+uint8_t image_get_pixel_per_byte(enum ImageFormat format)
+{
+	switch (format)
+	{
+	case IMAGE_ARGB:
+	case IMAGE_RGBA:
+	case IMAGE_BGRA:
+		return 4;
+	case IMAGE_RGB:
+	case IMAGE_BGR:
+		return 3;
+	}
+}
+
+image* create_empty_image(uint32_t width, uint32_t height, enum ImageFormat format)
+{
+	image* image = malloc(sizeof(struct image));
+	if (image == 0)
+	{
+		printf("Error allocating memory for the image!\n");
+		exit(-1);
+	}
+
+	image->format = format;
+	image->width = width;
+	image->height = height;
+	image->rawImageData = malloc(image_get_pixel_per_byte(format) * width * height);
+	if (image->rawImageData == 0)
+	{
+		printf("Error allocating memory for the image!\n");
+		exit(-1);
+	}
+	return image;
+}
+
 int main()
 {
-	image* image = read_image_from_file("testImage.bmp");
+	image* image = read_image_from_file("font.bmp");
 	//convert_image_to_format(image, IMAGE_RGBA);
 	write_image_to_file(image, IMAGE_BMP, "output.bmp");
 	

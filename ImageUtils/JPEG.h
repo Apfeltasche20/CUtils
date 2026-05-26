@@ -1,5 +1,8 @@
 #pragma once
 #include "ImageUtils.h"
+#include "DynamicBuffer.h"
+#include "DynamicArray.h"
+
 
 enum JPEG_SEGMENT_TYPE {
 	JPEG_SEGMENT_START_OF_IMAGE = 0xD8,

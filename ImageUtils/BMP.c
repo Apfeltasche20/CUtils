@@ -8,12 +8,6 @@
 
 #define CHECK_BUFFER_SIZE(length, error_message) if ((length) > buffer_size) {printf(error_message); return 0;}
 
-image* read_bmp_dib_header_5_image(uint8_t * image_data, uint64_t buffer_size, bmp_file_header* bmp_file_header, bmp_dib_header_v5* dib_header)
-{
-	printf("read_bmp_dib_header_5_image not implemented!\n");
-	return 0;
-}
-
 enum BMP_PIXEL_FORMAT bmp_dib_info_header_get_pixel_format(bmp_dib_info_header* dib_header)
 {
 	if ((dib_header->compression == BMP_COMPRESSION_RGB) && (dib_header->bits_per_pixel == 24))
@@ -22,7 +16,27 @@ enum BMP_PIXEL_FORMAT bmp_dib_info_header_get_pixel_format(bmp_dib_info_header* 
 	return BMP_PIXEL_FORMAT_UNKNOWN;
 }
 
-uint8_t bmp_read_pixel_data_r8g8b8(image* result_image, uint32_t pixel_data_start, uint8_t* image_data, uint64_t buffer_size)
+enum BMP_PIXEL_FORMAT bmp_dib_header_v5_get_pixel_format(bmp_dib_header_v5* dib_header)
+{
+	// BIT MASK ARE IN BIG ENDIAN!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	
+	if ((dib_header->compression == BMP_COMPRESSION_RGB) && (dib_header->bits_per_pixel == 24))
+	{
+		if ((dib_header->red_channel_bitmask == 0x0000FF00) && (dib_header->green_channel_bitmask == 0x00FF0000) && (dib_header->blue_channel_bitmask == 0xFF000000))
+			return BMP_PIXEL_FORMAT_B8G8R8;
+	}
+	else if ((dib_header->compression == BMP_COMPRESSION_BITFIELDS) && (dib_header->bits_per_pixel == 32))
+	{
+		if ((dib_header->red_channel_bitmask == 0x00FF0000) && (dib_header->green_channel_bitmask == 0x0000FF00) && (dib_header->blue_channel_bitmask == 0x000000FF) && (dib_header->alpha_channel_bitmask == 0xFF000000))
+			return BMP_PIXEL_FORMAT_B8G8R8A8;
+		else if ((dib_header->red_channel_bitmask == 0x0000FF00) && (dib_header->green_channel_bitmask == 0x00FF0000) && (dib_header->blue_channel_bitmask == 0xFF000000) && (dib_header->alpha_channel_bitmask == 0x000000FF))
+			return BMP_PIXEL_FORMAT_A8R8G8B8;
+	}
+
+	return BMP_PIXEL_FORMAT_UNKNOWN;
+}
+
+uint8_t bmp_read_pixel_data_b8g8r8(image* result_image, uint32_t pixel_data_start, uint8_t* image_data, uint64_t buffer_size)
 {
 	result_image->format = IMAGE_BGR;
 	
@@ -49,15 +63,104 @@ uint8_t bmp_read_pixel_data_r8g8b8(image* result_image, uint32_t pixel_data_star
 	return 1;
 }
 
+uint8_t bmp_read_pixel_data_b8g8r8a8(image* result_image, uint32_t pixel_data_start, uint8_t* image_data, uint64_t buffer_size)
+{
+	result_image->format = IMAGE_BGRA;
+
+	uint64_t complete_image_data_size = result_image->width * result_image->height * 4;
+	CHECK_BUFFER_SIZE(pixel_data_start + complete_image_data_size, "Image Pixel Array Out ouf Bounds!\n");
+
+	uint8_t* new_pixel_buffer = malloc(complete_image_data_size);
+	if (new_pixel_buffer == 0)
+	{
+		printf("Error Allocating Memory for Pixel Buffer!\n");
+		return 0;
+	}
+
+	memcpy(new_pixel_buffer, &(image_data[pixel_data_start]), complete_image_data_size);
+	result_image->rawImageData = new_pixel_buffer;
+
+	return 1;
+}
+
+uint8_t bmp_read_pixel_data_a8r8g8b8(image* result_image, uint32_t pixel_data_start, uint8_t* image_data, uint64_t buffer_size)
+{
+	result_image->format = IMAGE_ARGB;
+
+	uint64_t complete_image_data_size = result_image->width * result_image->height * 4;
+	CHECK_BUFFER_SIZE(pixel_data_start + complete_image_data_size, "Image Pixel Array Out ouf Bounds!\n");
+
+	uint8_t* new_pixel_buffer = malloc(complete_image_data_size);
+	if (new_pixel_buffer == 0)
+	{
+		printf("Error Allocating Memory for Pixel Buffer!\n");
+		return 0;
+	}
+
+	memcpy(new_pixel_buffer, &(image_data[pixel_data_start]), complete_image_data_size);
+	result_image->rawImageData = new_pixel_buffer;
+
+	return 1;
+}
+
 uint8_t bmp_read_pixel_data(image* result_image, enum BMP_PIXEL_FORMAT pixel_format, uint32_t pixel_data_start, uint8_t* image_data, uint64_t buffer_size)
 {
 	switch (pixel_format)
 	{
 	case BMP_PIXEL_FORMAT_B8G8R8:
-		return bmp_read_pixel_data_r8g8b8(result_image, pixel_data_start, image_data, buffer_size);
+		return bmp_read_pixel_data_b8g8r8(result_image, pixel_data_start, image_data, buffer_size);
+	
+	case BMP_PIXEL_FORMAT_B8G8R8A8:
+		return bmp_read_pixel_data_b8g8r8a8(result_image, pixel_data_start, image_data, buffer_size);
+
+	case BMP_PIXEL_FORMAT_A8R8G8B8:
+		return bmp_read_pixel_data_a8r8g8b8(result_image, pixel_data_start, image_data, buffer_size);
 
 	default:
 		printf("Reading Pixel Format %i not supported!\n", pixel_format);
+		return 0;
+	}
+}
+
+image* read_bmp_dib_header_5_image(uint8_t* image_data, uint64_t buffer_size, bmp_file_header* bmp_file_header, bmp_dib_header_v5* dib_header)
+{
+	if (dib_header->colors_in_color_table > 0)
+	{
+		printf("BMP Images with Color Table not implemented!\n");
+		return 0;
+	}
+	if ((dib_header->compression != BMP_COMPRESSION_RGB) && (dib_header->compression != BMP_COMPRESSION_BITFIELDS))
+	{
+		printf("Compressed BMP Images not implemented!\n");
+		return 0;
+	}
+	
+	enum BMP_PIXEL_FORMAT pixel_format = bmp_dib_header_v5_get_pixel_format(dib_header);
+	if (pixel_format == BMP_PIXEL_FORMAT_UNKNOWN)
+	{
+		printf("Unknown BMP DIB Header V5 Pixel Format!\n");
+		return 0;
+	}
+
+	image* result_image = malloc(sizeof(struct image));
+	if (result_image == 0)
+	{
+		printf("Error Allocting Memory for Image!\n");
+		return 0;
+	}
+	result_image->width = dib_header->image_width;
+	result_image->height = dib_header->image_height;
+	result_image->x_resolution = dib_header->x_pixel_per_meter;
+	result_image->y_resolution = dib_header->y_pixel_per_meter;
+
+	uint8_t success = bmp_read_pixel_data(result_image, pixel_format, bmp_file_header->pixel_array_offset, image_data, buffer_size);
+	if (success)
+	{
+		return result_image;
+	}
+	else
+	{
+		free(result_image);
 		return 0;
 	}
 }

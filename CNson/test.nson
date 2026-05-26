@@ -1,0 +1,53 @@
+player_state
+{
+    current_map = "start_map"
+    x = 0
+    y = 0
+    party
+    {
+        Eevee
+        {
+            nickname = "Eevee"
+            item = "none"
+            level = 1
+            xp = 0
+            current_hp = 1
+            nature = "neutral"
+            iv
+            {
+                hp = 31
+                att = 31
+                def = 31
+                spatt = 31
+                spdef = 31
+                ini = 31
+            }
+            ev
+            {
+                hp = 4
+                att = 0
+                def = 0
+                spatt = 255
+                spdef = 0
+                ini = 255
+            }
+            moves
+            {
+                0 = "Tackle"
+                1 = "Tail Whip"
+            }
+        }
+    }
+}
+world_state
+{
+    max_gym_badges = 8
+    gym_badge_1 = false
+    gym_badge_2 = false
+    gym_badge_3 = false
+    gym_badge_4 = false
+    gym_badge_5 = false
+    gym_badge_6 = false
+    gym_badge_7 = false
+    gym_badge_8 = false
+}
