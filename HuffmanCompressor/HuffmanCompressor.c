@@ -109,8 +109,11 @@ void huffman_insert_leaf_into_priority_queue(uint64_t* priorities, huffman_tree_
 
 void huffman_build_encode_lookup(uint64_t* lookup, uint64_t* length, huffman_tree_node* current_node, uint64_t current_codeword, uint64_t current_length)
 {
-	huffman_tree_entry* left = (huffman_tree_entry*)(((uint64_t)current_node) - current_node->zero_offset);
-	huffman_tree_entry* right = (huffman_tree_entry*)(((uint64_t)current_node) - current_node->one_offset);
+	uint16_t zero_offset = ((((uint16_t)current_node->zero_offset) | (((uint16_t)current_node->zero_offset_top) << 8)));
+	uint16_t one_offset = ((((uint16_t)current_node->one_offset) | (((uint16_t)current_node->one_offset_top) << 8)));
+	
+	huffman_tree_entry* left = (huffman_tree_entry*)(((uint64_t)current_node) - zero_offset);
+	huffman_tree_entry* right = (huffman_tree_entry*)(((uint64_t)current_node) - one_offset);
 
 	if (left->type == HUFFMAN_TREE_NODE)
 		huffman_build_encode_lookup(lookup, length, left, (current_codeword << 1), current_length + 1);
@@ -141,11 +144,11 @@ uint8_t* huffman_encode_data(uint8_t* input_data, uint64_t input_data_length, hu
 	}
 
 	/*
-		The Huffman Tree should have never more than 255 + 256 = 511 Entries
-		As each Entrie is 8 in Size 4088 Bytes should always be big enough for the Tree
+		The Huffman Tree should have never more than 255 Nodes and 256 Leafes
+		As each Node is 3 Bytes and Leaf 2 Bytes the Tree should never be bigger than 255 * 3 + 256 * 2 = 1277 Bytes
 	*/
-	memory_allocation_struct->memory = malloc(4088);
-	memory_allocation_struct->current_max_size = 4088;
+	memory_allocation_struct->memory = malloc(1277);
+	memory_allocation_struct->current_max_size = 1277;
 	memory_allocation_struct->current_size = 0;
 
 	if (memory_allocation_struct->memory == 0)
@@ -203,8 +206,14 @@ uint8_t* huffman_encode_data(uint8_t* input_data, uint64_t input_data_length, hu
 		/*
 			Offset sould always be positive, because the new_node is the currently biggest address
 		*/
-		new_node->zero_offset = (uint16_t)(((uint64_t)new_node) - ((uint64_t)first_tree_entry));
-		new_node->one_offset = (uint16_t)(((uint64_t)new_node) - ((uint64_t)second_tree_entry));
+		uint16_t zero_offset = ((uint16_t)(((uint64_t)new_node) - ((uint64_t)first_tree_entry)));
+		new_node->zero_offset = zero_offset & 0xFF;
+		new_node->zero_offset_top = (zero_offset >> 8) & 0b111;
+
+		uint16_t one_offset = ((uint16_t)(((uint64_t)new_node) - ((uint64_t)second_tree_entry)));
+		new_node->one_offset = one_offset & 0xFF;
+		new_node->one_offset_top = (one_offset >> 8) & 0b111;
+		// new_node->one_offset = (uint16_t)(((uint64_t)new_node) - ((uint64_t)second_tree_entry));
 
 		huffman_insert_branch_into_priority_queue(priorities, tree_nodes, new_priority, new_node);
 	}
@@ -298,7 +307,8 @@ uint8_t huffman_get_next_decoded_byte(huffman_bit_stream* bit_stream, huffman_tr
 		
 		if (next_bit == 1)
 		{
-			huffman_tree_entry* right = (huffman_tree_entry*)(((uint64_t)current_node) - current_node->one_offset);
+			uint16_t one_offset = ((((uint16_t)current_node->one_offset) | (((uint16_t)current_node->one_offset_top) << 8)));
+			huffman_tree_entry* right = (huffman_tree_entry*)(((uint64_t)current_node) - one_offset);
 			if (right->type == HUFFMAN_TREE_LEAF)
 			{
 				return ((huffman_tree_leaf*)right)->word;
@@ -310,7 +320,8 @@ uint8_t huffman_get_next_decoded_byte(huffman_bit_stream* bit_stream, huffman_tr
 		}
 		else
 		{
-			huffman_tree_entry* left = (huffman_tree_entry*)(((uint64_t)current_node) - current_node->zero_offset);
+			uint16_t zero_offset = ((((uint16_t)current_node->zero_offset) | (((uint16_t)current_node->zero_offset_top) << 8)));
+			huffman_tree_entry* left = (huffman_tree_entry*)(((uint64_t)current_node) - zero_offset);
 			if (left->type == HUFFMAN_TREE_LEAF)
 			{
 				return ((huffman_tree_leaf*)left)->word;
@@ -397,7 +408,7 @@ ERROR_CLOSE_HANDLE:
 int main()
 {
 	uint64_t size = 0;
-	uint8_t* data = read_file("testPDF.pdf", &size);
+	uint8_t* data = read_file("apfeltaschen.bmp", &size);
 
 	huffman_tree_memory_allocation_struct* huffman_tree_memory_allocation_struct;
 	huffman_tree_node* huffman_tree;
