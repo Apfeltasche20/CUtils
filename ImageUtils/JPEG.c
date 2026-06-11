@@ -1,23 +1,36 @@
 #include "JPEG.h"
 #include "DynamicBuffer.h"
 #include "DynamicArray.h"
+#include <stdlib.h>
+#include <stdio.h>
 
 #define CHECK_BUFFER_BOUNDS(error_message) if (current_buffer_position >= buffer_size) {printf(error_message); return 0;}
 #define CHECK_BUFFER_LENGTH(length, error_message) if ((current_buffer_position + length) >= buffer_size) {printf(error_message); return 0;}
 #define get_section_length(section) ((section->section_length_high << 8) | section->section_length_low)
 
+uint8_t jpeg_get_next_bit_in_huffman_bit_stream(jpeg_bit_stream* stream)
+{
+	uint8_t bit = (stream->data[stream->byte_pos] >> stream->bit_pos) & 1;
+
+	stream->bit_pos++;
+	if (stream->bit_pos >= 8)
+	{
+		stream->bit_pos = 0;
+		stream->byte_pos++;
+	}
+
+	return bit;
+}
+
 uint8_t* jpeg_decode_huffman_table(jpeg_huffman_table* huffman_table, uint8_t* data, uint64_t data_length)
 {
 	dynamic_buffer* buffer = dynamic_buffer_create();
 
-	for (int i = 0; i < data_length; i++)
-	{
-		uint8_t current = data[data_length];
-
-
-	}
+	//for(int i = 0;i<huffman_table)
 
 	dynamic_buffer_free(buffer);
+
+	exit(-1);
 }
 
 void decode_progressive_jpeg_image_scan(jpeg_image* jpeg_image, jpeg_decoder* jpeg_decoder, jpeg_start_of_scan_section* scan_header, uint8_t* encoded_data, uint64_t encoded_data_length)

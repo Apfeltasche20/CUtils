@@ -21,6 +21,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CNson", "CNson\CNson.vcxpro
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "List", "List\List.vcxproj", "{91A3DF27-8616-42CB-80AA-BB3C3272F2F5}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HuffmanCompressor", "HuffmanCompressor\HuffmanCompressor.vcxproj", "{062AF932-48DF-46FF-8B65-8F6A801C0B89}"
+	ProjectSection(ProjectDependencies) = postProject
+		{63D0D678-5F25-45C7-8602-60E62FE793AA} = {63D0D678-5F25-45C7-8602-60E62FE793AA}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -77,6 +82,14 @@ Global
 		{91A3DF27-8616-42CB-80AA-BB3C3272F2F5}.Release|x64.Build.0 = Release|x64
 		{91A3DF27-8616-42CB-80AA-BB3C3272F2F5}.Release|x86.ActiveCfg = Release|Win32
 		{91A3DF27-8616-42CB-80AA-BB3C3272F2F5}.Release|x86.Build.0 = Release|Win32
+		{062AF932-48DF-46FF-8B65-8F6A801C0B89}.Debug|x64.ActiveCfg = Debug|x64
+		{062AF932-48DF-46FF-8B65-8F6A801C0B89}.Debug|x64.Build.0 = Debug|x64
+		{062AF932-48DF-46FF-8B65-8F6A801C0B89}.Debug|x86.ActiveCfg = Debug|Win32
+		{062AF932-48DF-46FF-8B65-8F6A801C0B89}.Debug|x86.Build.0 = Debug|Win32
+		{062AF932-48DF-46FF-8B65-8F6A801C0B89}.Release|x64.ActiveCfg = Release|x64
+		{062AF932-48DF-46FF-8B65-8F6A801C0B89}.Release|x64.Build.0 = Release|x64
+		{062AF932-48DF-46FF-8B65-8F6A801C0B89}.Release|x86.ActiveCfg = Release|Win32
+		{062AF932-48DF-46FF-8B65-8F6A801C0B89}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

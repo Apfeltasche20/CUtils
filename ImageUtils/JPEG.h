@@ -157,3 +157,10 @@ typedef struct jpeg_decoder {
 	};
 	jpeg_frame_component* frame_components[256];
 } jpeg_decoder;
+
+typedef struct jpeg_bit_stream {
+	char* data;
+	uint64_t data_length;
+	uint64_t byte_pos;
+	uint64_t bit_pos;
+} jpeg_bit_stream;

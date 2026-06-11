@@ -42,6 +42,7 @@ char* read_file(char* file)
 		goto ERROR_FREE_BUFFER;
 	}
 	file_data[file_size.QuadPart] = 0; // NULL TERMINATE DATA TO USE AS STRING
+	CloseHandle(file_handle);
 	return file_data;
 
 ERROR_FREE_BUFFER:

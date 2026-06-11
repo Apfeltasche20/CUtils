@@ -68,8 +68,8 @@ image* read_image_from_data(uint8_t* image_data, uint64_t buffer_size)
 	switch (getImageFileFormat(image_data, buffer_size))
 	{
 	case IMAGE_JPEG:
-		printf("JPEG Not Supported!\n");
-		return 0;
+		//printf("JPEG Not Supported!\n");
+		//return 0;
 		return read_jpeg_image(image_data, buffer_size);
 
 	case IMAGE_BMP:
@@ -212,9 +212,9 @@ image* create_empty_image(uint32_t width, uint32_t height, enum ImageFormat form
 
 int main()
 {
-	image* image = read_image_from_file("font.bmp");
+	image* image = read_image_from_file("testImage.jpg");
 	//convert_image_to_format(image, IMAGE_RGBA);
-	write_image_to_file(image, IMAGE_BMP, "output.bmp");
+	//write_image_to_file(image, IMAGE_BMP, "output.bmp");
 	
 	return 0;
 }
