@@ -20,7 +20,7 @@ void* huffman_malloc(huffman_tree_memory_allocation_struct* memory_struct, uint6
 		exit(-1);
 	}
 
-	void* memory = (void*)&(((char*)memory_struct->memory)[memory_struct->current_size]);
+	void* memory = (void*)&(((char*)memory_struct->memory)[memory_struct->current_max_size - (memory_struct->current_size + size)]);
 	memory_struct->current_size += size;
 	
 	return memory;
@@ -112,8 +112,8 @@ void huffman_build_encode_lookup(uint64_t* lookup, uint64_t* length, huffman_tre
 	uint16_t zero_offset = ((((uint16_t)current_node->zero_offset) | (((uint16_t)current_node->zero_offset_top) << 8)));
 	uint16_t one_offset = ((((uint16_t)current_node->one_offset) | (((uint16_t)current_node->one_offset_top) << 8)));
 	
-	huffman_tree_entry* left = (huffman_tree_entry*)(((uint64_t)current_node) - zero_offset);
-	huffman_tree_entry* right = (huffman_tree_entry*)(((uint64_t)current_node) - one_offset);
+	huffman_tree_entry* left = (huffman_tree_entry*)(((uint64_t)current_node) + zero_offset);
+	huffman_tree_entry* right = (huffman_tree_entry*)(((uint64_t)current_node) + one_offset);
 
 	if (left->type == HUFFMAN_TREE_NODE)
 		huffman_build_encode_lookup(lookup, length, left, (current_codeword << 1), current_length + 1);
@@ -206,11 +206,11 @@ uint8_t* huffman_encode_data(uint8_t* input_data, uint64_t input_data_length, hu
 		/*
 			Offset sould always be positive, because the new_node is the currently biggest address
 		*/
-		uint16_t zero_offset = ((uint16_t)(((uint64_t)new_node) - ((uint64_t)first_tree_entry)));
+		uint16_t zero_offset = ((uint16_t)(((uint64_t)first_tree_entry) - ((uint64_t)new_node)));
 		new_node->zero_offset = zero_offset & 0xFF;
 		new_node->zero_offset_top = (zero_offset >> 8) & 0b111;
 
-		uint16_t one_offset = ((uint16_t)(((uint64_t)new_node) - ((uint64_t)second_tree_entry)));
+		uint16_t one_offset = ((uint16_t)(((uint64_t)second_tree_entry) - ((uint64_t)new_node)));
 		new_node->one_offset = one_offset & 0xFF;
 		new_node->one_offset_top = (one_offset >> 8) & 0b111;
 		// new_node->one_offset = (uint16_t)(((uint64_t)new_node) - ((uint64_t)second_tree_entry));
@@ -229,10 +229,12 @@ uint8_t* huffman_encode_data(uint8_t* input_data, uint64_t input_data_length, hu
 
 	huffman_build_encode_lookup(encode_huffman_lookup, encode_length, *root, 0, 0);
 
+	/*
 	for (int i = 0; i < 256; i++)
 	{
 		printf("%i: %lli, %llx\n", i, encode_length[i], encode_huffman_lookup[i]);
 	}
+	*/
 
 	/*
 		Encode Data
@@ -308,7 +310,7 @@ uint8_t huffman_get_next_decoded_byte(huffman_bit_stream* bit_stream, huffman_tr
 		if (next_bit == 1)
 		{
 			uint16_t one_offset = ((((uint16_t)current_node->one_offset) | (((uint16_t)current_node->one_offset_top) << 8)));
-			huffman_tree_entry* right = (huffman_tree_entry*)(((uint64_t)current_node) - one_offset);
+			huffman_tree_entry* right = (huffman_tree_entry*)(((uint64_t)current_node) + one_offset);
 			if (right->type == HUFFMAN_TREE_LEAF)
 			{
 				return ((huffman_tree_leaf*)right)->word;
@@ -321,7 +323,7 @@ uint8_t huffman_get_next_decoded_byte(huffman_bit_stream* bit_stream, huffman_tr
 		else
 		{
 			uint16_t zero_offset = ((((uint16_t)current_node->zero_offset) | (((uint16_t)current_node->zero_offset_top) << 8)));
-			huffman_tree_entry* left = (huffman_tree_entry*)(((uint64_t)current_node) - zero_offset);
+			huffman_tree_entry* left = (huffman_tree_entry*)(((uint64_t)current_node) + zero_offset);
 			if (left->type == HUFFMAN_TREE_LEAF)
 			{
 				return ((huffman_tree_leaf*)left)->word;
@@ -359,7 +361,7 @@ uint8_t* huffman_decode_data(uint8_t* input_data, uint64_t input_data_length, hu
 uint8_t* read_file(char* file, uint64_t* size)
 {
 	HANDLE file_handle = CreateFileA(file, GENERIC_READ, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
-	if (file_handle == 0)
+	if (file_handle == -1)
 	{
 		printf("File %s could not be opened!\n", file);
 		return 0;
@@ -405,6 +407,7 @@ ERROR_CLOSE_HANDLE:
 	return 0;
 }
 
+/*
 int main()
 {
 	uint64_t size = 0;
@@ -417,8 +420,9 @@ int main()
 	uint8_t filling_bits_count;
 	uint8_t* encoded_data = huffman_encode_data(data, size, &huffman_tree, &output_data_size, &huffman_tree_memory_allocation_struct, &filling_bits_count);
 
-	printf("Input Data Size: 0x%llx\nOutput Data Size: 0x%llx, Huffman Table Size: 0x%llx\nComplete Output Size: 0x%llx\nCompression: %f\n", size, output_data_size, huffman_tree_memory_allocation_struct->current_size, output_data_size + huffman_tree_memory_allocation_struct->current_size,  (float)size / (output_data_size + huffman_tree_memory_allocation_struct->current_size));
+	printf("Input Data Size: 0x%llx\nOutput Data Size: 0x%llx, Huffman Table Size: 0x%llx\nComplete Output Size: 0x%llx\nCompression: %f%%\n", size, output_data_size, huffman_tree_memory_allocation_struct->current_size, output_data_size + huffman_tree_memory_allocation_struct->current_size, (1.0 - ((output_data_size + huffman_tree_memory_allocation_struct->current_size) / (float) size)) * 100);
 
+	return;
 	uint8_t* decoded_data = huffman_decode_data(encoded_data, output_data_size, huffman_tree, size);
 
 	uint8_t correct = 1;
@@ -438,3 +442,4 @@ int main()
 
 	return 0;
 }
+//*/

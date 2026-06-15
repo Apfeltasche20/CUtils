@@ -4,11 +4,11 @@
 #include <Windows.h>
 #include "stdio.h"
 
-image* read_image_from_file(char* file_name)
+image* packed_filesystem_read_file(char* file_name)
 {
 	image* result_image = 0;
 	HANDLE file_handle = CreateFileA(file_name, GENERIC_READ, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
-	if (file_handle == 0)
+	if (file_handle == -1)
 	{
 		printf("File %s could not be opened!\n", file_name);
 		return 0;
@@ -212,7 +212,7 @@ image* create_empty_image(uint32_t width, uint32_t height, enum ImageFormat form
 
 int main()
 {
-	image* image = read_image_from_file("testImage.jpg");
+	image* image = packed_filesystem_read_file("testImage.jpg");
 	//convert_image_to_format(image, IMAGE_RGBA);
 	//write_image_to_file(image, IMAGE_BMP, "output.bmp");
 	

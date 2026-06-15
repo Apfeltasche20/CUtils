@@ -21,8 +21,8 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{062af932-48df-46ff-8b65-8f6a801c0b89}</ProjectGuid>
-    <RootNamespace>HuffmanCompressor</RootNamespace>
+    <ProjectGuid>{8445bc4b-08e0-4f11-afd4-b1d65ee256de}</ProjectGuid>
+    <RootNamespace>VirtualFilesystem</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -40,7 +40,7 @@
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
@@ -102,7 +102,6 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>D:\Code\CUtils\DynamicBuffer;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -124,16 +123,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="HuffmanCompressor.c" />
+    <ClCompile Include="VirtualFilesystem.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="HuffmanCompressor.h" />
-    <ClInclude Include="HuffmanTree.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\DynamicBuffer\DynamicBuffer.vcxproj">
-      <Project>{63d0d678-5f25-45c7-8602-60e62fe793aa}</Project>
-    </ProjectReference>
+    <ClInclude Include="VirtualFilesystem.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

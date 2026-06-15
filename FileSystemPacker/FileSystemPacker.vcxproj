@@ -21,8 +21,8 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{062af932-48df-46ff-8b65-8f6a801c0b89}</ProjectGuid>
-    <RootNamespace>HuffmanCompressor</RootNamespace>
+    <ProjectGuid>{a899545b-fa9d-48fe-99e1-289f80eb33a2}</ProjectGuid>
+    <RootNamespace>FileSystemPacker</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -40,7 +40,7 @@
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
@@ -102,11 +102,12 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>D:\Code\CUtils\DynamicBuffer;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\Code\CUtils\HuffmanCompressor;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>Shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -124,15 +125,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="HuffmanCompressor.c" />
+    <ClCompile Include="FileSystemPacker.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="HuffmanCompressor.h" />
-    <ClInclude Include="HuffmanTree.h" />
+    <ClInclude Include="FileSystemPacker.h" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\DynamicBuffer\DynamicBuffer.vcxproj">
-      <Project>{63d0d678-5f25-45c7-8602-60e62fe793aa}</Project>
+    <ProjectReference Include="..\HuffmanCompressor\HuffmanCompressor.vcxproj">
+      <Project>{062af932-48df-46ff-8b65-8f6a801c0b89}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
