@@ -1,0 +1,6 @@
+SelfExtractingDirectoryMakerMaker.exe SelfExtractingDirectoryMaker.exe SelfExtractingDirectory.exe
+
+rename output.exe to Maker.exe
+
+Maker.exe [Source Dir] [Main.exe] 
+eg. Maker.exe D:\Code\ImagePaint\x64\Debug ImagePaint.exe

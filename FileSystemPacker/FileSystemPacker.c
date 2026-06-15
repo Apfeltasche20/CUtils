@@ -231,6 +231,7 @@ uint8_t* unpack_file_entry(char* output_directory, uint8_t* data, packed_filesys
 
         free(uncompressed);
     }
+    CloseHandle(handle);
 
     return ((uint64_t)file) + file->offset_to_data + sizeof(struct packed_filesystem_entry_file) + file->data_size;
 }
@@ -327,8 +328,10 @@ void unpack_directory(char* output_directory, char* file)
     free(data);
 }
 
+/*
 int main()
 {
     //pack_directory("D:\\Code\\CUtils\\HuffmanCompressor", "output-compressed.bin");
     //unpack_directory("output", "output-compressed.bin");
 }
+*/

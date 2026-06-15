@@ -30,6 +30,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "VirtualFilesystem", "Virtua
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FileSystemPacker", "FileSystemPacker\FileSystemPacker.vcxproj", "{A899545B-FA9D-48FE-99E1-289F80EB33A2}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SelfExtractingDirectory", "SelfExtractingDirectory\SelfExtractingDirectory.vcxproj", "{9796FC22-391F-4F83-AC4F-4CEE22EAF31B}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SelfExtractingDirectoryMaker", "SelfExtractingDirectoryMaker\SelfExtractingDirectoryMaker.vcxproj", "{9BC0BCFC-F6BD-4B22-A4C3-3BE9FB1412C9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -110,6 +114,22 @@ Global
 		{A899545B-FA9D-48FE-99E1-289F80EB33A2}.Release|x64.Build.0 = Release|x64
 		{A899545B-FA9D-48FE-99E1-289F80EB33A2}.Release|x86.ActiveCfg = Release|Win32
 		{A899545B-FA9D-48FE-99E1-289F80EB33A2}.Release|x86.Build.0 = Release|Win32
+		{9796FC22-391F-4F83-AC4F-4CEE22EAF31B}.Debug|x64.ActiveCfg = Debug|x64
+		{9796FC22-391F-4F83-AC4F-4CEE22EAF31B}.Debug|x64.Build.0 = Debug|x64
+		{9796FC22-391F-4F83-AC4F-4CEE22EAF31B}.Debug|x86.ActiveCfg = Debug|Win32
+		{9796FC22-391F-4F83-AC4F-4CEE22EAF31B}.Debug|x86.Build.0 = Debug|Win32
+		{9796FC22-391F-4F83-AC4F-4CEE22EAF31B}.Release|x64.ActiveCfg = Release|x64
+		{9796FC22-391F-4F83-AC4F-4CEE22EAF31B}.Release|x64.Build.0 = Release|x64
+		{9796FC22-391F-4F83-AC4F-4CEE22EAF31B}.Release|x86.ActiveCfg = Release|Win32
+		{9796FC22-391F-4F83-AC4F-4CEE22EAF31B}.Release|x86.Build.0 = Release|Win32
+		{9BC0BCFC-F6BD-4B22-A4C3-3BE9FB1412C9}.Debug|x64.ActiveCfg = Debug|x64
+		{9BC0BCFC-F6BD-4B22-A4C3-3BE9FB1412C9}.Debug|x64.Build.0 = Debug|x64
+		{9BC0BCFC-F6BD-4B22-A4C3-3BE9FB1412C9}.Debug|x86.ActiveCfg = Debug|Win32
+		{9BC0BCFC-F6BD-4B22-A4C3-3BE9FB1412C9}.Debug|x86.Build.0 = Debug|Win32
+		{9BC0BCFC-F6BD-4B22-A4C3-3BE9FB1412C9}.Release|x64.ActiveCfg = Release|x64
+		{9BC0BCFC-F6BD-4B22-A4C3-3BE9FB1412C9}.Release|x64.Build.0 = Release|x64
+		{9BC0BCFC-F6BD-4B22-A4C3-3BE9FB1412C9}.Release|x86.ActiveCfg = Release|Win32
+		{9BC0BCFC-F6BD-4B22-A4C3-3BE9FB1412C9}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

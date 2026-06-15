@@ -21,8 +21,8 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{a899545b-fa9d-48fe-99e1-289f80eb33a2}</ProjectGuid>
-    <RootNamespace>FileSystemPacker</RootNamespace>
+    <ProjectGuid>{9bc0bcfc-f6bd-4b22-a4c3-3be9fb1412c9}</ProjectGuid>
+    <RootNamespace>SelfExtractingDirectoryMaker</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -40,7 +40,7 @@
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
@@ -102,7 +102,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>D:\Code\CUtils\HuffmanCompressor;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\Code\CUtils\FileSystemPacker;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -125,14 +125,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="FileSystemPacker.c" />
+    <ClCompile Include="SelfExtractingDirectoryMaker.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="FileSystemPacker.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\HuffmanCompressor\HuffmanCompressor.vcxproj">
-      <Project>{062af932-48df-46ff-8b65-8f6a801c0b89}</Project>
+    <ProjectReference Include="..\FileSystemPacker\FileSystemPacker.vcxproj">
+      <Project>{a899545b-fa9d-48fe-99e1-289f80eb33a2}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\SelfExtractingDirectory\SelfExtractingDirectory.vcxproj">
+      <Project>{9796fc22-391f-4f83-ac4f-4cee22eaf31b}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
